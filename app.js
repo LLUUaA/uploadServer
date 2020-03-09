@@ -15,7 +15,6 @@ const NODE_ENV = process.env.NODE_ENV || "production"; // env
 if (!fs.existsSync(saveDir)) {
     fs.mkdirSync(saveDir);
 }
-
 const allowCrossList = [
     'chat.bubaocloud.xin',
 ];
@@ -35,7 +34,9 @@ function canCross(host) {
 // set Access-Control middleware
 app.use(async (ctx, next) => {
     await next();
-    if (ctx.request.path === "/upload" && !canCross(ctx.hostname)) {
+    // orgin 来自哪里
+    // host 当前访问host
+    if (ctx.request.path === "/upload" && !canCross(ctx.headers.origin)) {
         ctx.throw("Host Error");
         return;
     }
@@ -141,7 +142,7 @@ router.post('/upload', async (ctx) => {
     const fileName = filePath.substr(i + matchkey.length);
     ctx.body = {
         status: 200,
-        fileUrl: `${ctx.request.host}/static/${fileName}`
+        fileUrl: `${ctx.headers.host}/static/${fileName}`
     };
 });
 
