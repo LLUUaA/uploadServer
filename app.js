@@ -27,7 +27,7 @@ app.use(async (ctx, next) => {
         await next();
         ctx.body = ctx.body || {
             code: 0,
-            message: "your ip is:" + ctx.request.ip
+            message: "your ip is:" + ctx.request.header['x-real-ip'],
         }
     } catch (error) {
         let [errorType, code, errMsg] = (error.message || "").split(',');
@@ -62,7 +62,7 @@ app.use(async (ctx, next) => {
     }
     const resp = await request({
         hostname: "127.0.0.1",
-        port: 3000,
+        port: 3003,
         url: '/account/checkSession',
         headers: ctx.request.headers
     });
@@ -124,15 +124,16 @@ router.get("/static/:fileName", (ctx) => {
     const {
         fileName
     } = ctx.params;
-    ctx.set("content-type", `image/${getExt(fileName)}`);
-    const file = fs.readFileSync(`${saveDir}\\${fileName}`);
-    // const file = fs.readFile(`${saveDir}\\${fileName}`,{}, (err, data) =>{
-    //     ctx.body = data;
-    // });
-    ctx.status = 200;
-    ctx.body = file;
+    try {
+        ctx.set("content-type", `image/${getExt(fileName)}`);
+        const file = fs.readFileSync(`${saveDir}\\${fileName}`);
+        ctx.status = 200;
+        ctx.body = file;
+    } catch (error) {
+        ctx.status = 204;
+    }
 });
 
 
 app.use(router.routes());
-app.listen(3003);
+app.listen(3002);
