@@ -19,8 +19,9 @@ const allowCrossList = [
     'chat.bubaocloud.xin',
 ];
 
-function canCross(host) {
+function canCross(url) {
     if (NODE_ENV === "production") {
+        const {host} = new URL(url);
         for (const item of allowCrossList) {
             if (item === host) {
                 return true;
