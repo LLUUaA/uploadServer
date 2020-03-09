@@ -137,13 +137,13 @@ app.use(koaBody({
 }));
 
 router.post('/upload', async (ctx) => {
-    const matchkey = 'uploads\\/';
+    const matchkey = 'uploads//';
     const filePath = ctx.request.files.file.path;
     const i = filePath.indexOf(matchkey);
     const fileName = filePath.substr(i + matchkey.length);
     ctx.body = {
         status: 200,
-        fileUrl: `${ctx.request.host}/static/${fileName}`
+        fileUrl: `http://${ctx.request.host}/static/${fileName}`
     };
 });
 
