@@ -107,13 +107,11 @@ app.use(async (ctx, next) => {
  */
 function getExt(fileName, dot) {
     try {
-        const nameArr = fileName.split('.');
-        if (nameArr.length > 1) {
-            return `${dot === true ? '.':''}${nameArr[nameArr.length - 1]}` || '';
-        } else {
-            throw new EvalError();
-        }
-
+        const ext = path.extname(fileName);
+        if(dot === false) {
+            return ext.replace('.','');
+        } 
+        return ext;
     } catch (error) {
         return '';
     }
@@ -126,8 +124,8 @@ app.use(koaBody({
         uploadDir: saveDir,
         hash: 'sha1',
         keepExtensions: true,
-        onFileBegin: function (name, file) {
-            file.path = `${saveDir}/${crypto.randomBytes(32).toString('hex')}${getExt(file.name, true)}`;
+        onFileBegin: function (name, file) {    
+            file.path = path.resolve(saveDir,`${crypto.randomBytes(32).toString('hex')}${getExt(file.name)}`);
         },
     },
 
@@ -137,13 +135,10 @@ app.use(koaBody({
 }));
 
 router.post('/upload', async (ctx) => {
-    const matchkey = 'uploads//';
     const filePath = ctx.request.files.file.path;
-    const i = filePath.indexOf(matchkey);
-    const fileName = filePath.substr(i + matchkey.length);
     ctx.body = {
         status: 200,
-        fileUrl: `http://${ctx.request.host}/static/${fileName}`
+        fileUrl: `http://${ctx.request.host}/static/${path.basename(filePath)}`
     };
 });
 
@@ -152,7 +147,7 @@ router.get("/static/:fileName", (ctx) => {
         fileName
     } = ctx.params;
     try {
-        ctx.set("content-type", `image/${getExt(fileName)}`);
+        ctx.set("content-type", `image/${getExt(fileName, false)}`);
         const file = fs.readFileSync(`${saveDir}\/${fileName}`);
         ctx.status = 200;
         ctx.body = file;

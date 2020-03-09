@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "dev": "nodemon app.js",
-    "prod": "NODE_ENV=production & pm2 start app.js",
+    "prod": "export NODE_ENV=production & (set NODE_ENV=production) & pm2 start app.js",
+    "dev2": "export NODE_ENV=development & (set NODE_ENV=development) & nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
