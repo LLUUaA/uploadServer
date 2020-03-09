@@ -7,15 +7,35 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const request = require("./request");
-
 const saveDir = path.join(__dirname, 'uploads/');
 
+console.log("UPLOAD NODE_ENV", process.env.NODE_ENV);
+
+const NODE_ENV = process.env.NODE_ENV || "production"; // env
 if (!fs.existsSync(saveDir)) {
     fs.mkdirSync(saveDir);
+}
+
+const allowCrossList = [
+    'chat.bubaocloud.xin'
+];
+
+function canCross(host) {
+    if (NODE_ENV === "production") {
+        for (const item of allowCrossList) {
+            if (item === host) {
+                return true;
+            }
+        }
+    } else {
+        return true;
+    }
+    return false;
 }
 // set Access-Control middleware
 app.use(async (ctx, next) => {
     await next();
+    // if (ctx.request.path === "/upload" && !canCross(ctx.hostname)) {  return; }
     ctx.set('Access-Control-Allow-Origin', "*");
     ctx.set('Access-Control-Allow-Headers', '*');
     ctx.set('Access-Control-Allow-Methods', 'POST, GET', 'OPTIONS');
@@ -116,7 +136,7 @@ router.post('/upload', async (ctx) => {
     const fileName = filePath.substr(i + matchkey.length);
     ctx.body = {
         status: 200,
-        fileUrl: `${ctx.request.origin}/static/${fileName}`
+        fileUrl: `${ctx.request.host}/static/${fileName}`
     };
 });
 
