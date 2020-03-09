@@ -17,7 +17,7 @@ if (!fs.existsSync(saveDir)) {
 }
 
 const allowCrossList = [
-    'chat.bubaocloud.xin'
+    'chat.bubaocloud.xin',
 ];
 
 function canCross(host) {
@@ -35,7 +35,10 @@ function canCross(host) {
 // set Access-Control middleware
 app.use(async (ctx, next) => {
     await next();
-    // if (ctx.request.path === "/upload" && !canCross(ctx.hostname)) {  return; }
+    if (ctx.request.path === "/upload" && !canCross(ctx.hostname)) {
+        ctx.throw("Host Error");
+        return;
+    }
     ctx.set('Access-Control-Allow-Origin', "*");
     ctx.set('Access-Control-Allow-Headers', '*');
     ctx.set('Access-Control-Allow-Methods', 'POST, GET', 'OPTIONS');
@@ -49,15 +52,17 @@ app.use(async (ctx, next) => {
             code: 0,
             message: "your ip is:" + ctx.request.header['x-real-ip'],
         }
-    } catch (error) {
-        let [errorType, code, errMsg] = (error.message || "").split(',');
-        if (errorType === "Error") {
+    } catch (e) {
+        // catch 住全局的错误信息
+        console.log("error", e);
+        let [errorType, code, errMsg] = (e.message || "").split(',');
+        if (errorType === "Error" && code) {
             code = Number(code) || -1;
             errMsg = errMsg;
-            ctx.status = code;
+            ctx.status = 500;
         } else {
             code = -1;
-            errMsg = error.message === "[object Object]" ? "server error" : error || error.message;
+            errMsg = e.message || "server error";
         }
         ctx.status = ctx.status || 500;
         ctx.body = {
@@ -78,7 +83,7 @@ app.use(async (ctx, next) => {
         return await next();
     }
     if (!authorization) {
-        throw new Error("Auth Error");
+        ctx.throw("Auth Error");
     }
     const resp = await request({
         hostname: "127.0.0.1",
