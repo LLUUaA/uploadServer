@@ -143,7 +143,7 @@ router.post('/upload', async (ctx) => {
     const fileName = filePath.substr(i + matchkey.length);
     ctx.body = {
         status: 200,
-        fileUrl: `${ctx.headers.host}/static/${fileName}`
+        fileUrl: `${ctx.request.host}/static/${fileName}`
     };
 });
 
@@ -153,7 +153,7 @@ router.get("/static/:fileName", (ctx) => {
     } = ctx.params;
     try {
         ctx.set("content-type", `image/${getExt(fileName)}`);
-        const file = fs.readFileSync(`${saveDir}\\${fileName}`);
+        const file = fs.readFileSync(`${saveDir}\/${fileName}`);
         ctx.status = 200;
         ctx.body = file;
     } catch (error) {
