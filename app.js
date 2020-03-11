@@ -20,18 +20,21 @@ const allowCrossList = [
 ];
 
 function canCross(url) {
-    if (NODE_ENV === "production") {
-        const {host} = new URL(url);
+    if (!NODE_ENV === "production") {
+        return true;
+    };
+    try {
+        const { host } = new URL(url);
         for (const item of allowCrossList) {
             if (item === host) {
                 return true;
             }
         }
-    } else {
-        return true;
+    } catch (error) {
+        return false;
     }
-    return false;
 }
+
 // set Access-Control middleware
 app.use(async (ctx, next) => {
     await next();
@@ -108,9 +111,9 @@ app.use(async (ctx, next) => {
 function getExt(fileName, dot) {
     try {
         const ext = path.extname(fileName);
-        if(dot === false) {
-            return ext.replace('.','');
-        } 
+        if (dot === false) {
+            return ext.replace('.', '');
+        }
         return ext;
     } catch (error) {
         return '';
@@ -124,8 +127,8 @@ app.use(koaBody({
         uploadDir: saveDir,
         hash: 'sha1',
         keepExtensions: true,
-        onFileBegin: function (name, file) {    
-            file.path = path.resolve(saveDir,`${crypto.randomBytes(32).toString('hex')}${getExt(file.name)}`);
+        onFileBegin: function (name, file) {
+            file.path = path.resolve(saveDir, `${crypto.randomBytes(32).toString('hex')}${getExt(file.name)}`);
         },
     },
 
