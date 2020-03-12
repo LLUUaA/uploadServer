@@ -128,7 +128,7 @@ app.use(koaBody({
         hash: 'sha1',
         keepExtensions: true,
         onFileBegin: function (name, file) {
-            file.path = path.resolve(saveDir, `${crypto.randomBytes(32).toString('hex')}${getExt(file.name)}`);
+            file.path = path.resolve(saveDir, `${crypto.randomBytes(16).toString('hex')}${getExt(file.name)}`);
         },
     },
 
@@ -151,11 +151,11 @@ router.get("/static/:fileName", (ctx) => {
     } = ctx.params;
     try {
         ctx.set("content-type", `image/${getExt(fileName, false)}`);
-        const file = fs.readFileSync(`${saveDir}\/${fileName}`);
+        const file = fs.readFileSync(path.resolve(saveDir,fileName));
         ctx.status = 200;
         ctx.body = file;
     } catch (error) {
-        ctx.status = 204;
+        ctx.status = 500;
     }
 });
 
